@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Family Tree Demo";
+}
+
+<br />
+<div id="Loading" class="alert alert-info">
+    Loading ...
+</div>
+<div id="BindingError" class="alert alert-danger" style="display:none;"></div>
+
+<div style="display:none;" id="Problems">
+    <div class="jumbotron" style="padding:30px 30px !important;">
+        <div class="col-sm-12 mx-auto">
+            <h3>Problem 1: Meet the family</h3>
+            <br />
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Find</span>
+                </div>
+                <select class="custom-select" id="Problem1Relationships">
+                    <option value="" selected>-- Select Relationship --</option>
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Of Person</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Person Name" id="Problem1PersonName" />
+            </div>
+            <div class="input-group mb-3">
+                <button type="button" class="btn btn-primary" id="btnFindRelatives" onclick="javascript:GetRelatives();">Find</button>
+            </div>
+            <div class="alert alert-success" role="alert" id="Problem1Result" style="display:none"></div>
+            <div class="alert alert-danger" role="alert" id="Problem1Error" style="display:none"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var _loadingFailed = false;
+
+    $(document).ready(function () {
+        BindRelationships();
+
+        $("#Loading").hide();
+
+        if (_loadingFailed) {
+            $("#BindingError").text("Sorry, Unexpected error occured while loading a page!");
+            $("#BindingError").show();
+        } else {
+            $("#Problems").show();
+        }
+
+        $('#Problem1Relationships').focus();
+    });
+
+    $(document).unbind("keyup").keyup(function (e) {
+        var code = e.which;
+        if (code == 13) {
+            $("#btnFindRelatives").click();
+        }
+    });
+
+    function GetRelatives() {
+
+        if ($("#btnFindRelatives").text() != "Find") {
+            return;
+        }
+
+        $("#Problem1Result").html("");
+        $("#Problem1Error").html("");
+        $("#Problem1Result").hide();
+        $("#Problem1Error").hide();
+
+        var isValid = true;
+        var message = "";
+
+        if ($.trim($("#Problem1Relationships").val()) == "") {
+            isValid = false;
+            message = "Please select relationship";
+        } else if ($.trim($("#Problem1PersonName").val()) == "") {
+            isValid = false;
+            message = "Please enter person name";
+        }
+
+        if (isValid == false) {
+            $("#Problem1Error").text(message);
+            $("#Problem1Error").show();
+            return;
+        }
+        
+        $("#btnFindRelatives").text("Please wait..");
+        
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            url: "/Home/FindRelatives",
+            data: { personName: $("#Problem1PersonName").val(), relationshipName: $("#Problem1Relationships").val() },
+            success: function (data) {
+
+                $("#Problem1Result").show();
+
+                var result = [];
+
+                $.each(data.relativeInfo, function (personIndex, person) {
+
+                    var relativeNames = [];
+
+                    $.each(person.relatives, function (relativeIndex, relative) {
+                        relativeNames.push(relative.name + " (ID: " + relative.personId + ")");
+                    });
+
+                    if (relativeNames.length > 0) {
+                        result.push($("#Problem1Relationships option:selected").text() + " of " + person.person.name + " (ID: " + person.person.personId + ") = " + relativeNames.join(", "));
+                    } else {
+                        result.push($("#Problem1Relationships option:selected").text() + " of " + person.person.name + " (ID: " + person.person.personId + ") = Not found");
+                    }
+                });
+
+                $("#Problem1Result").html(result.join("<br />"));
+            },
+            error: function (jqXHR, textStatus, error) {
+                if (jqXHR.status == 404) {
+                    $("#Problem1Error").text("Person not found");
+                }
+                else {
+                    $("#Problem1Error").text("Sorry, Unexpected error occurred while finding relatives!");
+                }
+
+                $("#Problem1Error").show();
+
+                $("#btnFindRelatives").text("Find");
+
+                _loadingFailed = true;
+            },
+            complete: function () {
+                $("#btnFindRelatives").text("Find");
+            }
+        });
+    }
+
+    function BindRelationships() {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            async: false,
+            url: "/Home/GetRelationships",
+            success: function (data) {
+                $.each(data.relationships, function (relationIndex, relationship) {
+                    if ($.trim(relationship.name) != "") {
+                        $('<option />', { value: relationship.name, text: relationship.description }).appendTo($("#Problem1Relationships"));
+                    }                    
+                });
+            },
+            error: function (jqXHR, textStatus, error) {
+                _loadingFailed = true;
+            }
+        });
+    }
+</script>

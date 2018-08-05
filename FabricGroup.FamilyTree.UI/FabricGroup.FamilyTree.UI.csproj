@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FabricGroup.FamilyTree.UI.Bootstrapper\FabricGroup.FamilyTree.UI.Bootstrapper.csproj" />
+    <ProjectReference Include="..\FabricGroup.FamilyTree.UI.Services.Interfaces\FabricGroup.FamilyTree.UI.Services.Interfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+</Project>

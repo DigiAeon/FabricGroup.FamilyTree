@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FabricGroup.FamilyTree.Common\FabricGroup.FamilyTree.Common.csproj" />
+    <ProjectReference Include="..\FabricGroup.FamilyTree.Domain\FabricGroup.FamilyTree.Domain.csproj" />
+    <ProjectReference Include="..\FabricGroup.FamilyTree.UI.Services.Interfaces\FabricGroup.FamilyTree.UI.Services.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>
